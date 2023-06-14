@@ -70,16 +70,15 @@ public class Server {
 
     private void process(Request req, Response res) {
         // 多线程
-//        new Thread(() -> {
-//
-//        });
-        // 匹配到静态文件, 终止路由
+        new Thread(() -> {
+            // 匹配到静态文件, 终止路由
             if (matchStaticFile(req.path, res)) return;
             // 没有匹配到路由
             if (!matchGET(req, res) && !matchPOST(req, res)) {
                 // 返回404
                 res.setStatus(404).end();
             }
+        }).start();
     }
 
     public void listen() {

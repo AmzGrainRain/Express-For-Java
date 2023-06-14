@@ -1,6 +1,7 @@
 package Server;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -13,20 +14,21 @@ public class Request {
     public String path;
     public String httpVersion;
 
-    public Request(InputStream is) {
+    public Request(InputStream is) throws IOException {
         this.is = is;
         message = new ArrayList<>();
 
-        try {
-            // 存储 http 请求报文
-            BufferedReader br = new BufferedReader(new InputStreamReader(is));
-            String line;
-            while ((line = br.readLine()) != null) {
-                message.add(line);
-            }
-            br.close();
+        // 存储 http 请求报文
+//        BufferedReader br = new BufferedReader(new InputStreamReader(is));
+//        String line;
+//        while ((line = br.readLine()) != null) {
+//            message.add(line);
+//        }
+//        br.close();
 
+        try {
             // 处理基本请求参数
+            message.add(new BufferedReader(new InputStreamReader(is)).readLine());
             String[] baseParams = message.get(0).split(" ");
             method = baseParams[0].trim();
             path = baseParams[1].trim();
