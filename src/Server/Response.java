@@ -49,8 +49,8 @@ public class Response {
 
     public void sendFile(File f) {
         // 获取文件扩展名
-        String[] tmp = f.getName().split("\\.");
-        String extName = "." + tmp[tmp.length - 1];
+        String filePath = f.getName();
+        String extName = filePath.substring(filePath.lastIndexOf('.'));
         // 匹配正确的 MIME
         // 详见：https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Basics_of_HTTP/MIME_types
         setHeader("Content-Type", mimes.getOrDefault(extName, "application/octet-stream"));
