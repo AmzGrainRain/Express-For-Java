@@ -7,7 +7,7 @@ public class Main {
 
         app.get("/login", (req, res) -> {
             res.setHeader("Content-Type", "text/html; charset=utf-8");
-            res.send("<h1>您传入了" + req.body.get("asd") + "</h1>");
+            res.send("<h1>您传入了" + req.params.get("asd") + "</h1>");
         });
 
         app.get("/register", (req, res) -> {

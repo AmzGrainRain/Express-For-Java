@@ -6,9 +6,24 @@
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
-    <link rel="stylesheet" href="css/index.css" >
+    <link rel="stylesheet" href="css/index.css">
 </head>
 <body>
-    <h1>Hello World</h1>
+<h1>Hello World</h1>
+<button onclick="send()">asd</button>
+<script>
+        const send = () => {
+            const formData = new FormData();
+            formData.append("foo", "123");
+            formData.append("bar", "456");
+
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST", "http://localhost:8080");
+            xhr.setRequestHeader("Content-Type", "multipart/form-data");
+            xhr.send(formData);
+        }
+
+
+</script>
 </body>
 </html>
