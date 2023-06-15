@@ -83,6 +83,30 @@ public class Response {
         }
     }
 
+    public void send(String text) {
+        try {
+            StringBuilder sb = new StringBuilder();
+            sb.append("HTTP/1.1 ").append(status).append("\n");
+            for (Map.Entry<String, String> p : headers.entrySet()) {
+                sb.append(p.getKey());
+                sb.append(": ");
+                sb.append(p.getValue());
+                sb.append("\n");
+            }
+            // 两个换行用来间隔响应参数和响应体
+            sb.append("\n");
+
+            // 响应体
+            sb.append(text);
+
+            os.write(sb.toString().getBytes());
+            os.flush();
+            os.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public void end() {
         try {
             StringBuilder sb = new StringBuilder();

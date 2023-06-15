@@ -40,11 +40,13 @@ public class Server {
     }
 
     private boolean matchStaticFile(String path, Response res) {
-        File f = new File(staticPath + path);
+        path = staticPath + path;
+        File f = new File(path);
 
         // 匹配目录
         if (f.isDirectory()) {
-            File nf = new File(staticPath + path + "index.html");
+            if (path.charAt(path.length() - 1) != '/') path += '/';
+            File nf = new File(path + "index.html");
             if (nf.isFile()) {
                 res.sendFile(nf);
                 return true;
@@ -81,9 +83,7 @@ public class Server {
         // 多线程
         new Thread(() -> {
             // 中间件
-            for (CallBack cb : PRE) {
-                //if (!cb.call(req, res)) return;
-            }
+            for (CallBack cb : PRE) cb.call(req, res);
             // 匹配到静态文件, 终止路由
             if (matchStaticFile(req.path, res)) return;
             // 没有匹配到路由
@@ -96,10 +96,15 @@ public class Server {
 
     public void listen() {
         try (ServerSocket ss = new ServerSocket(port)) {
+            System.out.println("Server running at http://127.0.0.1:" + port + ".");
             while (true) {
                 Socket client = ss.accept();
                 Request req = new Request(client.getInputStream());
                 Response res = new Response(client.getOutputStream());
+                if (!req.ok) {
+                    res.setStatus(400).end();
+                    continue;
+                }
                 process(req, res);
             }
         } catch (IOException e) {
