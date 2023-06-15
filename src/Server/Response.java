@@ -12,6 +12,7 @@ public class Response {
 
     public Response(OutputStream os) {
         this.os = os;
+        status = 200;
         headers = new HashMap<>();
         mimes = new HashMap<>() {
             {
@@ -34,19 +35,33 @@ public class Response {
                 put(".js", "application/javascript");
             }
         };
-        status = 200;
     }
 
+    /**
+     * 设置请求头
+     * @param k 请求头类型
+     * @param v 请求头值
+     * @return 链式调用
+     */
     public Response setHeader(String k, String v) {
         headers.put(k, v);
         return this;
     }
 
+    /**
+     * 设置 HTTP 状态码
+     * @param status 状态码
+     * @return 链式调用
+     */
     public Response setStatus(int status) {
         this.status = status;
         return this;
     }
 
+    /**
+     * 发送文件并结束响应
+     * @param f 文件
+     */
     public void sendFile(File f) {
         // 获取文件扩展名
         String filePath = f.getName();
@@ -83,6 +98,10 @@ public class Response {
         }
     }
 
+    /**
+     * 发送文本并结束响应
+     * @param text 文本
+     */
     public void send(String text) {
         try {
             StringBuilder sb = new StringBuilder();
@@ -107,6 +126,9 @@ public class Response {
         }
     }
 
+    /**
+     * 结束响应
+     */
     public void end() {
         try {
             StringBuilder sb = new StringBuilder();

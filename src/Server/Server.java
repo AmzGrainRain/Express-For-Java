@@ -15,6 +15,11 @@ public class Server {
     private final Set<CallBack> PRE;
     private String staticPath;
 
+    /**
+     * 构造器
+     *
+     * @param port 监听端口
+     */
     public Server(int port) {
         this.port = port;
         staticPath = "./static";
@@ -23,22 +28,51 @@ public class Server {
         PRE = new HashSet<>();
     }
 
+    /**
+     * 设置静态目录
+     *
+     * @param path 绝对路径
+     */
     public void staticDir(String path) {
         this.staticPath = path;
     }
 
+    /**
+     * 中间件
+     *
+     * @param cb 回调函数
+     */
     public void use(CallBack cb) {
         PRE.add(cb);
     }
 
+    /**
+     * 设置 GET 路由
+     *
+     * @param route 路由
+     * @param cb    回调函数
+     */
     public void get(String route, CallBack cb) {
         GET.put(route, cb);
     }
 
+    /**
+     * 设置 POST 路由
+     *
+     * @param route 路由
+     * @param cb    回调函数
+     */
     public void post(String route, CallBack cb) {
         POST.put(route, cb);
     }
 
+    /**
+     * 静态文件匹配
+     *
+     * @param path 文件路径
+     * @param res  响应实例
+     * @return 是否匹配成功
+     */
     private boolean matchStaticFile(String path, Response res) {
         path = staticPath + path;
         File f = new File(path);
@@ -63,6 +97,13 @@ public class Server {
         return false;
     }
 
+    /**
+     * GET 路由匹配
+     *
+     * @param req 请求实例
+     * @param res 响应实例
+     * @return 是否匹配成功
+     */
     private boolean matchGET(Request req, Response res) {
         if (!req.method.equalsIgnoreCase("GET")) return false;
         if (!GET.containsKey(req.path)) return false;
@@ -71,6 +112,13 @@ public class Server {
         return true;
     }
 
+    /**
+     * POST 路由匹配
+     *
+     * @param req 请求实例
+     * @param res 响应实例
+     * @return 是否匹配成功
+     */
     private boolean matchPOST(Request req, Response res) {
         if (!req.method.equalsIgnoreCase("POST")) return false;
         if (!POST.containsKey(req.path)) return false;
@@ -79,6 +127,12 @@ public class Server {
         return true;
     }
 
+    /**
+     * 处理路由匹配 (多线程)
+     *
+     * @param req 请求实例
+     * @param res 响应实例
+     */
     private void process(Request req, Response res) {
         // 多线程
         new Thread(() -> {
@@ -101,10 +155,14 @@ public class Server {
                 Socket client = ss.accept();
                 Request req = new Request(client.getInputStream());
                 Response res = new Response(client.getOutputStream());
+
+                // 请求头解析失败
                 if (!req.ok) {
                     res.setStatus(400).end();
                     continue;
                 }
+
+                // 匹配路由
                 process(req, res);
             }
         } catch (IOException e) {
