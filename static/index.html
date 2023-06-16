@@ -1,29 +1,22 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+<!DOCTYPE html>
+<html lang="zh-Hans">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>Document</title>
-    <link rel="stylesheet" href="css/index.css">
-</head>
-<body>
-<h1>Hello World</h1>
-<button onclick="send()">asd</button>
-<script>
-        const send = () => {
-            const formData = new FormData();
-            formData.append("foo", "123");
-            formData.append("bar", "456");
-
-            const xhr = new XMLHttpRequest();
-            xhr.open("POST", "http://localhost:8080");
-            xhr.setRequestHeader("Content-Type", "multipart/form-data");
-            xhr.send(formData);
-        }
-
-
-</script>
-</body>
+    <link rel="stylesheet" href="./css/index.css" />
+  </head>
+  <body>
+    <h1>Hello World</h1>
+    <br>
+    <input type="button" value="测试 GET 请求" onclick="testGET()">
+    <br>
+    <input type="button" value="测试 POST 请求" onclick="testPOST()">
+    <br>
+    <input type="button" value="要求服务端下发 SESSION" onclick="setSession()">
+    <br>
+    <input type="button" value="获取 SESSION" onclick="getSession()">
+    
+    <script src="./js/index.js"></script>
+  </body>
 </html>

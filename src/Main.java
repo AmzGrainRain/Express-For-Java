@@ -50,7 +50,7 @@ public class Main {
             // 设置响应头
             res.setHeader("Content-Type", "text/html; charset=utf-8");
             // 发送文本消息
-            res.send("<h1>成功设置 session</h1>");
+            res.send("成功设置 session");
         });
 
         // 获取请求中携带的 session
