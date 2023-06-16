@@ -20,6 +20,8 @@ public class Request {
         BufferedReader br = new BufferedReader(new InputStreamReader(is));
         // 处理 HTTP 报文
         ok = parseHttpMessage(br);
+        // 处理 cookie
+        parseCookie();
         // 解析 GET/POST 参数
         if (ok && method.equalsIgnoreCase("POST")) ok = parsePOST(br);
         // 打印日志
@@ -69,10 +71,10 @@ public class Request {
                 path = fullPath.substring(0, i);
                 String[] pairs = fullPath.substring(i + 1).split("&");
                 // 转换为键值对
-                this.body = new HashMap<>();
+                this.params = new HashMap<>();
                 for (String pair : pairs) {
                     String[] kv = pair.split("=");
-                    body.put(kv[0], kv[1]);
+                    params.put(kv[0], kv[1]);
                 }
             } else path = fullPath;
         } catch (NullPointerException | IOException e) {
@@ -80,6 +82,14 @@ public class Request {
             return false;
         }
         return true;
+    }
+
+    /**
+     * 解析 cookie id
+     */
+    private void parseCookie() {
+        if (!headersMap.containsKey("Cookie") || !headersMap.get("Cookie").matches("^JSESSIONID=.*")) return;
+        headersMap.put("Cookie", headersMap.get("Cookie").split("=")[1]);
     }
 
     /**
@@ -95,7 +105,7 @@ public class Request {
             if (!headersMap.containsKey("Content-Length")) return false;
             String[] types = headersMap.get("Content-Type").split("; ");
             // 仅处理 multipart/form-data 类型的表单数据
-            if (!types[0].equalsIgnoreCase("multipart/form-data")) return false;
+            if (!types[0].equalsIgnoreCase("multipart/form-data")) return true;
             // 根据 Content-Length 读取报文
             char[] buffer = new char[Integer.parseInt(headersMap.get("Content-Length"))];
             br.read(buffer, 0, buffer.length);

@@ -8,11 +8,10 @@ public class Response {
     private final OutputStream os;
     private final Map<String, String> headers;
     private final Map<String, String> mimes;
-    private int status;
+    private int status = 200;
 
     public Response(OutputStream os) {
         this.os = os;
-        status = 200;
         headers = new HashMap<>();
         mimes = new HashMap<>() {
             {
@@ -46,6 +45,28 @@ public class Response {
     public Response setHeader(String k, String v) {
         headers.put(k, v);
         return this;
+    }
+
+    /**
+     * 设置 session
+     * @param session Session 对象
+     */
+    public void setSession(Session session) {
+        StringBuilder sb = new StringBuilder();
+        // 会话 ID
+        sb.append("JSESSIONID=").append(session.id).append("; ");
+        // 会话过期时间
+        sb.append("expire=").append(session.expireTime).append("; ");
+        // 处理属性
+        session.attribute.forEach((key, value) -> {
+            sb.append(key).append("=").append(value).append("; ");
+        });
+        // 防止 xss 攻击
+        sb.append("HttpOnly");
+        // 存起来这个 session
+        Session.sessionMap.put(session.id, session);
+        // 要求客户端设置 session
+        setHeader("Set-Cookie", sb.toString());
     }
 
     /**
