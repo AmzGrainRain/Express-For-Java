@@ -1,4 +1,4 @@
-package com.amzlab;
+package amzlab;
 
 import java.util.HashMap;
 import java.util.Map;

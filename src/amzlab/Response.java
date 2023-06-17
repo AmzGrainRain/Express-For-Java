@@ -1,4 +1,4 @@
-package com.amzlab;
+package amzlab;
 
 import java.io.*;
 import java.util.HashMap;
@@ -13,31 +13,38 @@ public class Response {
     public Response(OutputStream os) {
         this.os = os;
         headers = new HashMap<>();
-        mimes = new HashMap<>() {
-            {
-                put(".html", "text/html");
-                put(".htm", "text/html");
-                put(".shtml", "text/html");
-                put(".css", "text/css");
 
-                put(".jpg", "image/jpeg");
-                put(".jpeg", "image/jpeg");
-                put(".png", "image/png");
-                put(".svg", "image/gif");
-                put(".gif", "image/gif");
+        mimes = new HashMap<>();
+        mimes.put(".html", "text/html");
+        mimes.put(".htm", "text/html");
+        mimes.put(".shtml", "text/html");
+        mimes.put(".css", "text/css");
+        mimes.put(".jpg", "image/jpeg");
+        mimes.put(".jpeg", "image/jpeg");
+        mimes.put(".png", "image/png");
+        mimes.put(".svg", "image/gif");
+        mimes.put(".gif", "image/gif");
+        mimes.put(".mp3", "audio/mpeg");
+        mimes.put(".ogg", "audio/ogg");
+        mimes.put(".mp4", "video/mp4");
+        mimes.put(".json", "application/json");
+        mimes.put(".js", "application/javascript");
+    }
 
-                put(".mp3", "audio/mpeg");
-                put(".ogg", "audio/ogg");
-                put(".mp4", "video/mp4");
+    /**
+     * [模板]创建响应报文
+     * @return 一个 StringBuilder
+     */
+    public StringBuilder createResponseMessage() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("HTTP/1.1 ").append(status).append("\n");
 
-                put(".json", "application/json");
-                put(".js", "application/javascript");
-            }
-        };
+        return sb;
     }
 
     /**
      * 设置请求头
+     *
      * @param k 请求头类型
      * @param v 请求头值
      * @return 链式调用
@@ -49,6 +56,7 @@ public class Response {
 
     /**
      * 设置 session
+     *
      * @param session Session 对象
      */
     public void setSession(Session session) {
@@ -71,6 +79,7 @@ public class Response {
 
     /**
      * 设置 HTTP 状态码
+     *
      * @param status 状态码
      * @return 链式调用
      */
@@ -81,6 +90,7 @@ public class Response {
 
     /**
      * 发送文件并结束响应
+     *
      * @param f 文件
      */
     public void sendFile(File f) {
@@ -92,8 +102,8 @@ public class Response {
         setHeader("Content-Type", mimes.getOrDefault(extName, "application/octet-stream"));
 
         try {
-            StringBuilder sb = new StringBuilder();
-            sb.append("HTTP/1.1 ").append(status).append("\n");
+            StringBuilder sb = createResponseMessage();
+
             for (Map.Entry<String, String> p : headers.entrySet()) {
                 sb.append(p.getKey());
                 sb.append(": ");
@@ -121,12 +131,18 @@ public class Response {
 
     /**
      * 发送文本并结束响应
+     *
      * @param text 文本
      */
     public void send(String text) {
         try {
-            StringBuilder sb = new StringBuilder();
-            sb.append("HTTP/1.1 ").append(status).append("\n");
+            StringBuilder sb = createResponseMessage();
+
+            // 如果没有设置 Content-Type 则默认 text/html; charset=utf-8
+            if (!headers.containsKey("Content-Type")) {
+                setHeader("Content-Type", "text/html; charset=utf-8");
+            }
+
             for (Map.Entry<String, String> p : headers.entrySet()) {
                 sb.append(p.getKey());
                 sb.append(": ");
@@ -152,8 +168,8 @@ public class Response {
      */
     public void end() {
         try {
-            StringBuilder sb = new StringBuilder();
-            sb.append("HTTP/1.1 ").append(status).append("\n");
+            StringBuilder sb = createResponseMessage();
+
             for (Map.Entry<String, String> p : headers.entrySet()) {
                 sb.append(p.getKey()).append(": ").append(p.getValue()).append("\n");
             }

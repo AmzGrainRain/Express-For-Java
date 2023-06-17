@@ -1,4 +1,4 @@
-package com.amzlab;
+package amzlab;
 
 @FunctionalInterface
 public interface CallBack {

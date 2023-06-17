@@ -1,4 +1,4 @@
-package com.amzlab;
+package amzlab;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -7,22 +7,43 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Set;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class Server {
+    private final ThreadPoolExecutor threadPool;
     private final int port;
     private final Map<String, CallBack> GET;
     private final Map<String, CallBack> POST;
-    private final Set<CallBack> PRE;
+    private final Set<Middleware> PRE;
     private String staticPath;
 
     /**
      * 构造器
      *
-     * @param port 监听端口
+     * @param port 端口
      */
     public Server(int port) {
+        threadPool = new ThreadPoolExecutor(2, 4, 30, TimeUnit.MINUTES, new LinkedBlockingQueue<>());
         this.port = port;
-        staticPath = "./static";
+        staticPath = null;
+        GET = new HashMap<>();
+        POST = new HashMap<>();
+        PRE = new HashSet<>();
+    }
+
+    /**
+     * 构造器
+     *
+     * @param port      监听端口
+     * @param threadNum 最大线程数
+     */
+    public Server(int port, int threadNum) {
+        threadPool = new ThreadPoolExecutor(threadNum / 2, threadNum, 60, TimeUnit.MINUTES, new LinkedBlockingDeque<>());
+        this.port = port;
+        staticPath = null;
         GET = new HashMap<>();
         POST = new HashMap<>();
         PRE = new HashSet<>();
@@ -38,11 +59,11 @@ public class Server {
     }
 
     /**
-     * 中间件
+     * 简单的路由拦截
      *
      * @param cb 回调函数
      */
-    public void use(CallBack cb) {
+    public void use(Middleware cb) {
         PRE.add(cb);
     }
 
@@ -74,6 +95,8 @@ public class Server {
      * @return 是否匹配成功
      */
     private boolean matchStaticFile(String path, Response res) {
+        if (staticPath == null) return false;
+
         path = staticPath + path;
         File f = new File(path);
 
@@ -134,10 +157,12 @@ public class Server {
      * @param res 响应实例
      */
     private void process(Request req, Response res) {
-        // 多线程
-        new Thread(() -> {
+        // 向线程池提交 Runnable 任务
+        threadPool.execute(() -> {
             // 中间件
-            for (CallBack cb : PRE) cb.call(req, res);
+            for (Middleware middleware : PRE) {
+                if (!middleware.call(req, res)) return;
+            }
             // 匹配到静态文件, 终止路由
             if (matchStaticFile(req.path, res)) return;
             // 没有匹配到路由
@@ -145,7 +170,7 @@ public class Server {
                 // 返回404
                 res.setStatus(404).end();
             }
-        }).start();
+        });
     }
 
     public void listen() {
