@@ -1,4 +1,4 @@
-package amzlab;
+package com.amzlab;
 
 import java.io.*;
 import java.net.ServerSocket;

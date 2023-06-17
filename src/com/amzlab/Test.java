@@ -1,4 +1,4 @@
-package amzlab;
+package com.amzlab;
 
 public class Test {
     public static void main(String[] args) {
