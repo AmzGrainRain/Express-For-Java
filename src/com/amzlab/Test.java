@@ -1,6 +1,14 @@
 package com.amzlab;
 
-import com.amzlab.json.User;
+// 导入阿里巴巴的 fastjson2 用于解析 josn 字符串
+import com.alibaba.fastjson2.JSON;
+
+// 可能传入的 json 格式
+class User {
+    public String name;
+    public String age;
+    public String address;
+}
 
 public class Test {
     private static void start(int threadNumber, String staticDir) {
@@ -118,12 +126,13 @@ public class Test {
         // 测试 json 数据解析
         System.out.println("接收 json 数据：/test-json");
         app.post("/test-json", (req, res) -> {
-            User u = (User) req.jsonBody;
-            StringBuilder sb = new StringBuilder();
-            sb.append("name: ").append(u.name).append("\n");
-            sb.append("age: ").append(u.age).append("\n");
-            sb.append("address: ").append(u.address).append("\n");
-            res.send(sb.toString());
+            // json 字符串转 User 对象
+            User u = JSON.parseObject(req.jsonString, User.class);
+
+            String sb = "name: " + u.name + "\n" +
+                    "age: " + u.age + "\n" +
+                    "address: " + u.address + "\n";
+            res.send(sb);
         });
 
         // 监听端口
