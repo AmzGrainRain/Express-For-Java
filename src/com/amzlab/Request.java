@@ -55,7 +55,7 @@ public class Request {
             this.headersMap = new HashMap<>();
             for (int i = 1; i < headers.size(); ++i) {
                 String[] kv = headers.get(i).split(":");
-                headersMap.put(kv[0].trim().toLowerCase(), kv[1].trim());
+                headersMap.put(kv[0].trim(), kv[1].trim());
             }
 
             String[] baseParams = headers.get(0).split(" ");
@@ -103,14 +103,14 @@ public class Request {
     private boolean parsePOST(BufferedReader br) {
         try {
             // 是否携带荷载
-            if (!headersMap.containsKey("content-length")) return false;
+            if (!headersMap.containsKey("Content-Length")) return false;
 
             // 根据 Content-Length 读取报文
-            char[] buffer = new char[Integer.parseInt(headersMap.get("content-length"))];
+            char[] buffer = new char[Integer.parseInt(headersMap.get("Content-Length"))];
             br.read(buffer, 0, buffer.length);
 
             // 内容类型
-            String contentType = headersMap.get("content-type").toLowerCase();
+            String contentType = headersMap.get("Content-Type").toLowerCase();
 
             // multipart/form-data
             if (contentType.contains("multipart/form-data")) {
