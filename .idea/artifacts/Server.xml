@@ -1,8 +1,0 @@
-<component name="ArtifactManager">
-  <artifact type="jar" build-on-make="true" name="Server">
-    <output-path>$PROJECT_DIR$/out/artifacts/</output-path>
-    <root id="archive" name="Express-For-Java.jar">
-      <element id="module-output" name="Express-For-Java" />
-    </root>
-  </artifact>
-</component>

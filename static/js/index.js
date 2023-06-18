@@ -55,3 +55,29 @@ function getSession() {
     .then((result) => console.log(result))
     .catch((error) => console.log("error", error));
 }
+
+function testJson() {
+    const myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
+    myHeaders.append("Accept", "*/*");
+    myHeaders.append("Host", "127.0.0.1:80");
+    myHeaders.append("Connection", "keep-alive");
+
+    const raw = JSON.stringify({
+       "name": "userName",
+       "age": "20",
+       "address": "南阳"
+    });
+
+    const requestOptions = {
+       method: 'POST',
+       headers: myHeaders,
+       body: raw,
+       redirect: 'follow'
+    };
+
+    fetch("http://127.0.0.1:80/test-json", requestOptions)
+       .then(response => response.text())
+       .then(result => console.log(result))
+       .catch(error => console.log('error', error));
+}

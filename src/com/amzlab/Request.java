@@ -5,13 +5,14 @@ import java.util.*;
 
 public class Request {
     private final InputStream is;
-    public List<String> headers = null;
-    public Map<String, String> headersMap = null;
-    public Map<String, String> body = null;
-    public Map<String, String> params = null;
+    public List<String> headers;
+    public Map<String, String> headersMap;
+    public Map<String, String> body;
+    public String jsonString;
+    public Map<String, String> params;
     public String method = "null";
     public String fullPath = "";
-    public String path = null;
+    public String path;
     public String httpVersion = "";
     public boolean ok;
 
@@ -54,7 +55,7 @@ public class Request {
             this.headersMap = new HashMap<>();
             for (int i = 1; i < headers.size(); ++i) {
                 String[] kv = headers.get(i).split(":");
-                headersMap.put(kv[0].trim(), kv[1].trim());
+                headersMap.put(kv[0].trim().toLowerCase(), kv[1].trim());
             }
 
             String[] baseParams = headers.get(0).split(" ");
@@ -77,11 +78,12 @@ public class Request {
                     params.put(kv[0], kv[1]);
                 }
             } else path = fullPath;
+
+            return true;
         } catch (NullPointerException | IOException e) {
             e.printStackTrace();
             return false;
         }
-        return true;
     }
 
     /**
@@ -99,61 +101,37 @@ public class Request {
      * @return 是否处理完成
      */
     private boolean parsePOST(BufferedReader br) {
-        // [multipart/form-data] https://zhuanlan.zhihu.com/p/195726295
         try {
-            // 是否携带参数
-            if (!headersMap.containsKey("Content-Length")) return false;
-            String[] types = headersMap.get("Content-Type").split("; ");
-            // 仅处理 multipart/form-data 类型的表单数据
-            if (!types[0].equalsIgnoreCase("multipart/form-data")) return true;
+            // 是否携带荷载
+            if (!headersMap.containsKey("content-length")) return false;
+
             // 根据 Content-Length 读取报文
-            char[] buffer = new char[Integer.parseInt(headersMap.get("Content-Length"))];
+            char[] buffer = new char[Integer.parseInt(headersMap.get("content-length"))];
             br.read(buffer, 0, buffer.length);
-            // 处理报文
-            parsePOSTFormData(new String(buffer), types[1].split("=")[1]);
+
+            // 内容类型
+            String contentType = headersMap.get("content-type").toLowerCase();
+
+            // multipart/form-data
+            if (contentType.contains("multipart/form-data")) {
+                String[] types = contentType.split("; ");
+                body = FormParser.parseFormData(new String(buffer), types[1].split("=")[1]);
+                return true;
+            }
+
+            // application/json
+            if (contentType.contains("application/json")) {
+                jsonString = new String(buffer);
+                return true;
+            }
+
+            return true;
         } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
-        return true;
     }
 
-    /**
-     * 处理 POST multipart/form-data 表单数据
-     *
-     * @param data      原始报文
-     * @param splitLine 分隔符
-     */
-    private void parsePOSTFormData(String data, String splitLine) {
-        body = new HashMap<>();
-        Scanner sc = new Scanner(data);
-        String line = sc.nextLine();
-        String key = null;
-        StringBuilder value = new StringBuilder();
-
-        while (sc.hasNextLine()) {
-            // 键值对凑齐了就添加
-            if (key != null && value.length() != 0) {
-                body.put(key, value.toString());
-                key = null;
-                value.delete(0, value.length());
-            }
-            // 一次判断两行
-            if (line.contains(splitLine) && (line = sc.nextLine()).startsWith("Content-Disposition")) {
-                key = line.split("; ")[1].split("=")[1].replaceAll("\"", "");
-                while (sc.hasNextLine()) {
-                    line = sc.nextLine();
-                    if (line.isEmpty()) continue; // 跳过空行
-                    if (line.contains(splitLine)) break; // 末行尾部有 "--" 所以用 startsWith 匹配
-                    value.append(line);
-                }
-            }
-        }
-        // 最后一个键值对凑齐了但会跳出循环, 所以就在外部添加
-        if (key != null && value.length() != 0) {
-            body.put(key, value.toString());
-        }
-    }
 
     /**
      * 控制台输出函数

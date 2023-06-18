@@ -1,13 +1,16 @@
 package com.amzlab;
 
+import com.amzlab.json.User;
+
 public class Test {
-    public static void main(String[] args) {
-        Server app = new Server(80, 6);
+    private static void start(int threadNumber, String staticDir) {
+        Server app = new Server(threadNumber);
 
         // 设置静态目录
-        app.staticDir("D:\\Repo\\Express-For-Java\\static");
+        app.staticDirectory(staticDir);
 
         // 中间件测试（匹配所有以 /view/ 开头的地址）
+        System.out.println("中间件测试（匹配所有以 /view/ 开头的地址）");
         app.use((req, res) -> {
             // 返回 true 代表继续匹配路由
             if (!req.path.matches("^/view/.*?")) return true;
@@ -20,6 +23,7 @@ public class Test {
         });
 
         // 测试 post 请求
+        System.out.println("post 接口：/test-post");
         app.post("/test-post", (req, res) -> {
             StringBuilder sb = new StringBuilder();
             // 获取明文参数
@@ -42,6 +46,7 @@ public class Test {
         });
 
         // 测试 get 请求
+        System.out.println("get 接口：/test-get");
         app.get("/test-get", (req, res) -> {
             // 获取明文参数
             StringBuilder sb = new StringBuilder();
@@ -57,6 +62,7 @@ public class Test {
         });
 
         // 设置一个 session
+        System.out.println("下发 session：/set-session");
         app.post("/set-session", (req, res) -> {
             // 创建一个 Session
             Session session = new Session();
@@ -71,6 +77,7 @@ public class Test {
         });
 
         // 获取请求中携带的 session
+        System.out.println("解析 session：/get-session");
         app.get("/get-session", (req, res) -> {
             // 设置响应头
             res.setHeader("Content-Type", "text/html; charset=utf-8");
@@ -108,8 +115,22 @@ public class Test {
             }
         });
 
-        app.listen();
+        // 测试 json 数据解析
+        System.out.println("接收 json 数据：/test-json");
+        app.post("/test-json", (req, res) -> {
+            User u = (User) req.jsonBody;
+            StringBuilder sb = new StringBuilder();
+            sb.append("name: ").append(u.name).append("\n");
+            sb.append("age: ").append(u.age).append("\n");
+            sb.append("address: ").append(u.address).append("\n");
+            res.send(sb.toString());
+        });
+
+        // 监听端口
+        app.listen(80);
+    }
+
+    public static void main(String[] args) {
+        start(6, "D:\\Repo\\Express-For-Java\\static");
     }
 }
-
-
