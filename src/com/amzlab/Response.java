@@ -60,21 +60,16 @@ public class Response {
      * @param session Session 对象
      */
     public void setSession(Session session) {
-        StringBuilder sb = new StringBuilder();
         // 会话 ID
-        sb.append("JSESSIONID=").append(session.id).append("; ");
-        // 会话过期时间
-        sb.append("expire=").append(session.expireTime).append("; ");
-        // 处理属性
-        session.attribute.forEach((key, value) -> {
-            sb.append(key).append("=").append(value).append("; ");
-        });
-        // 防止 xss 攻击
-        sb.append("HttpOnly");
+        String sessionString = "JSESSIONID=" + session.id + "; " +
+                // 会话过期时间
+                "expire=" + session.expireTime + "; " +
+                // 防止 xss 攻击
+                "HttpOnly";
         // 存起来这个 session
         Session.sessionMap.put(session.id, session);
         // 要求客户端设置 session
-        setHeader("Set-Cookie", sb.toString());
+        setHeader("Set-Cookie", sessionString);
     }
 
     /**
@@ -154,6 +149,32 @@ public class Response {
 
             // 响应体
             sb.append(text);
+
+            os.write(sb.toString().getBytes());
+            os.flush();
+            os.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * 响应 json 格式数据
+     * @param jsonString json 字符串
+     */
+    public void json(String jsonString) {
+        try {
+            StringBuilder sb = createResponseMessage();
+
+            for (Map.Entry<String, String> p : headers.entrySet()) {
+                sb.append(p.getKey()).append(": ").append(p.getValue()).append("\n");
+            }
+            sb.append("Content-Type: application/json; charset=utf-8\n");
+            // 两个换行用来间隔响应参数和响应体
+            sb.append("\n");
+
+            // 添加 json 载荷
+            sb.append(jsonString);
 
             os.write(sb.toString().getBytes());
             os.flush();
