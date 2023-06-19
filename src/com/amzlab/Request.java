@@ -110,7 +110,7 @@ public class Request {
             br.read(buffer, 0, buffer.length);
 
             // 内容类型
-            String contentType = headersMap.get("Content-Type").toLowerCase();
+            String contentType = headersMap.get("Content-Type");
 
             // multipart/form-data
             if (contentType.contains("multipart/form-data")) {
