@@ -73,7 +73,7 @@ public class Test {
         System.out.println("下发 session：/set-session");
         app.post("/set-session", (req, res) -> {
             // 创建一个 Session
-            Session session = new Session();
+            Session session = new Session("asd");
             // 为 session 添加一个属性
             session.setAttribute("userName", "test");
             // 设置 session
@@ -98,7 +98,7 @@ public class Test {
                 }
 
                 // 从请求头中获取 session id, session 是一个时间戳
-                long sessionID = Long.parseLong(req.headersMap.get("Cookie"));
+                String sessionID = req.headersMap.get("Cookie");
 
                 // 从 session map 里查询是否存在这个 session
                 if (!Session.sessionMap.containsKey(sessionID)) {
@@ -110,10 +110,10 @@ public class Test {
                 StringBuilder sb = new StringBuilder();
                 Session s = Session.sessionMap.get(sessionID);
                 sb.append("Session ID: ").append(sessionID).append("\n");
-                sb.append("Session Expire Time: ").append(s.expireTime).append("\n");
+                sb.append("Session Expire Time: ").append(s.activeTime).append("\n");
                 sb.append("Session Attributes:\n");
-                s.attribute.forEach((key, value) -> {
-                    sb.append(key).append(": ").append(value).append("\n");
+                s.attributeMap.forEach((key, value) -> {
+                    sb.append("\t").append(key).append(": ").append(value).append("\n");
                 });
 
                 res.send(sb.toString());

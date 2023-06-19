@@ -7,12 +7,12 @@ public class Session {
     public final String uid;
     public final long activeTime;
     private final long expireTime;
-    private final Map<String, String> attribute;
+    public final Map<String, String> attributeMap;
 
     public Session(String uid) {
         this.uid = uid;
         // session 携带的属性
-        attribute = new HashMap<>();
+        attributeMap = new HashMap<>();
         // 以当前的时间戳作为激活时间
         activeTime = System.currentTimeMillis();
         // 过期时间为一小时后
@@ -26,7 +26,7 @@ public class Session {
      * @param v 值
      */
     public void setAttribute(String k, String v) {
-        attribute.put(k, v);
+        attributeMap.put(k, v);
     }
 
     /**
@@ -34,7 +34,7 @@ public class Session {
      * @param k 键
      */
     public void delAttribude(String k) {
-        attribute.remove(k);
+        attributeMap.remove(k);
     }
 
     /**
