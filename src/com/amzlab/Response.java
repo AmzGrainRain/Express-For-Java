@@ -60,14 +60,19 @@ public class Response {
      * @param session Session 对象
      */
     public void setSession(Session session) {
+        // 如果已存在会话则先删除
+        Session.sessionMap.remove(session.uid);
+
         // 会话 ID
-        String sessionString = "JSESSIONID=" + session.id + "; " +
+        String sessionString = "JSESSIONID=" + session.uid + "; " +
                 // 会话过期时间
-                "expire=" + session.expireTime + "; " +
+                "expire=" + session.activeTime + "; " +
                 // 防止 xss 攻击
                 "HttpOnly";
+
         // 存起来这个 session
-        Session.sessionMap.put(session.id, session);
+        Session.sessionMap.put(session.uid, session);
+
         // 要求客户端设置 session
         setHeader("Set-Cookie", sessionString);
     }

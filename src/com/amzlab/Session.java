@@ -4,19 +4,19 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Session {
-    public final long id;
-    public final long expireTime;
-    public final Map<String, String> attribute;
+    public final String uid;
+    public final long activeTime;
+    private final long expireTime;
+    private final Map<String, String> attribute;
 
-    public Session() {
+    public Session(String uid) {
+        this.uid = uid;
         // session 携带的属性
         attribute = new HashMap<>();
-
-        // 以当前的时间戳作为 session id
-        id = System.currentTimeMillis();
-
+        // 以当前的时间戳作为激活时间
+        activeTime = System.currentTimeMillis();
         // 过期时间为一小时后
-        expireTime = id + 3600000;
+        expireTime = activeTime + 3600000;
     }
 
     /**
@@ -30,6 +30,14 @@ public class Session {
     }
 
     /**
+     * 删除属性
+     * @param k 键
+     */
+    public void delAttribude(String k) {
+        attribute.remove(k);
+    }
+
+    /**
      * session 是否过期
      *
      * @return 布尔
@@ -38,5 +46,5 @@ public class Session {
         return System.currentTimeMillis() < expireTime;
     }
 
-    public static Map<Long, Session> sessionMap = new HashMap<>();
+    public static Map<String, Session> sessionMap = new HashMap<>();
 }
