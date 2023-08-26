@@ -66,7 +66,7 @@ public class Response {
         // 会话 ID
         String sessionString = "JSESSIONID=" + session.uid + "; " +
                 // 会话过期时间
-                "expire=" + session.activeTime + "; " +
+                "Max-Age=" + session.activeTime + "; " +
                 // 防止 xss 攻击
                 "HttpOnly";
 
